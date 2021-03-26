@@ -241,7 +241,7 @@ read_more_btn: true
 
 # Post meta display settings
 post_meta:
-  item_text: false
+  item_text: true
   created_at: true
   updated_at:
     enable: true
@@ -811,7 +811,7 @@ mermaid:
 # Use Animate.css to animate everything.
 # For more information: https://animate.style
 motion:
-  enable: true
+  enable: false
   async: false
   transition:
     # All available transition variants: https://theme-next.js.org/animate/
