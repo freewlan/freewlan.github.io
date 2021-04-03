@@ -22,28 +22,33 @@
     var NexT = window.NexT || {};
     var CONFIG = {"hostname":"haoqianwei.com","root":"/","images":"/images","scheme":"Gemini","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
-<meta property="og:type" content="website">
-<meta property="og:title" content="一个沉迷低级趣味的人">
-<meta property="og:url" content="https://haoqianwei.com/index.html">
+<meta name="description" content="MySQL的like查询，可以用到索引吗？这是一个在面试中会被经常问到的问题。大部分情况下，大部分面试官希望听到的答案是，百分号在左边的情况下，是不会用到索引的，百分号在右边的情况，可以用到索引。那么，事实真的是这样吗？ 我们先看两个SQL，已知member表有400万条数据，其中mobile是索引字段。 SQL1： 1select * from member where mobile like">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL可以用到like索引吗">
+<meta property="og:url" content="https://haoqianwei.com/2021/04/03/mysql-can-use-like-index/index.html">
 <meta property="og:site_name" content="一个沉迷低级趣味的人">
+<meta property="og:description" content="MySQL的like查询，可以用到索引吗？这是一个在面试中会被经常问到的问题。大部分情况下，大部分面试官希望听到的答案是，百分号在左边的情况下，是不会用到索引的，百分号在右边的情况，可以用到索引。那么，事实真的是这样吗？ 我们先看两个SQL，已知member表有400万条数据，其中mobile是索引字段。 SQL1： 1select * from member where mobile like">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-03T07:39:40.000Z">
+<meta property="article:modified_time" content="2021-04-03T08:05:05.573Z">
 <meta property="article:author" content="Leslie">
+<meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://haoqianwei.com/">
+<link rel="canonical" href="https://haoqianwei.com/2021/04/03/mysql-can-use-like-index/">
 
 
 <script class="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
-<title>一个沉迷低级趣味的人</title>
+<title>MySQL可以用到like索引吗 | 一个沉迷低级趣味的人</title>
   
 
 
@@ -187,16 +192,17 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
 
-    
+
+  
 
 
 <div class="post-block">
   
   
 
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://haoqianwei.com/2021/04/03/mysql-can-use-like-index/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -209,9 +215,9 @@
       <meta itemprop="name" content="一个沉迷低级趣味的人">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2021/04/03/mysql-can-use-like-index/" class="post-title-link" itemprop="url">MySQL可以用到like索引吗</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          MySQL可以用到like索引吗
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -235,7 +241,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>MySQL的like查询，可以用到索引吗？这是一个在面试中会被经常问到的问题。大部分情况下，大部分面试官希望听到的答案是，百分号在左边的情况下，是不会用到索引的，百分号在右边的情况，可以用到索引。那么，事实真的是这样吗？</p>
+        <p>MySQL的like查询，可以用到索引吗？这是一个在面试中会被经常问到的问题。大部分情况下，大部分面试官希望听到的答案是，百分号在左边的情况下，是不会用到索引的，百分号在右边的情况，可以用到索引。那么，事实真的是这样吗？</p>
 <p>我们先看两个SQL，已知member表有400万条数据，其中mobile是索引字段。</p>
 <p>SQL1：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> <span class="keyword">member</span> <span class="keyword">where</span> mobile <span class="keyword">like</span> <span class="string">&#x27;%1300%&#x27;</span> limit <span class="number">10000</span>,<span class="number">10</span>;</span><br></pre></td></tr></table></figure>
@@ -257,7 +263,6 @@
 <p>神奇的结果发生了，我们发现，SQL2使用到了索引查询。</p>
 <p>这种情况，我们成为覆盖索引。当我们使用覆盖索引查询的时候，MySQL会直接在索引上进行查询的操作，就不会再进行回表操作。如此一来，速度大大提升。</p>
 
-      
     </div>
 
     
@@ -265,11 +270,16 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          </div>
+
+        
+
     </footer>
   </article>
 </div>
+
 
 
 
